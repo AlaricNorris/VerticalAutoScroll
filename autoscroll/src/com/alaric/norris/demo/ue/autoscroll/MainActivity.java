@@ -8,40 +8,42 @@ import android.util.Log ;
 import android.view.ViewTreeObserver ;
 import android.view.ViewTreeObserver.OnPreDrawListener ;
 import android.widget.LinearLayout ;
-import com.alaric.norris.demo.ue.autoscroll.R ;
 
 @ SuppressLint ( "NewApi" )
 public class MainActivity extends Activity implements OnPreDrawListener {
 
 	private LinearLayout mLinearLayout ;
 
-	private final Handler mHandler = new Handler() ;
+	private Handler mHandler = new Handler() ;
 
 	ViewTreeObserver mViewTreeObserver ;
 
-	@ SuppressLint ( "NewApi" )
 	@ Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState) ;
 		setContentView(R.layout.activity_main) ;
-//		mLinearLayout = (LinearLayout) findViewById(R.id.layout) ;
-//		mViewTreeObserver = mLinearLayout.getViewTreeObserver() ;
-//		mViewTreeObserver.addOnPreDrawListener(this) ;
-//		mHandler.postDelayed(ScrollRunnable , 1000) ;
+		mLinearLayout = (LinearLayout) findViewById(R.id.layout) ;
+		mViewTreeObserver = getWindow().getDecorView().getViewTreeObserver() ;
+		mViewTreeObserver.addOnPreDrawListener(this) ;
+		mHandler.postDelayed(ScrollRunnable , 1000) ;
 	}
 
 	private Runnable ScrollRunnable = new Runnable() {
 
 		@ Override
 		public void run() {
+			Log.i("tag" , "max" + max) ;
+			Log.i("tag" , "scrollBy" + mLinearLayout.getScrollY()) ;
+			Log.i("tag" , "getTranslationY" + mLinearLayout.getTranslationY()) ;
 			if(max > 0) {
-				mLinearLayout.scrollBy(0 , 30) ;
-				if(mLinearLayout.getScrollY() >= max) {
+//				mLinearLayout.setTranslationY(mLinearLayout.getTranslationY() + 30) ;
+//				mLinearLayout.postInvalidate() ;
+//				if(mLinearLayout.getTranslationY() >= max)
+//					mLinearLayout.setTranslationY(0) ;
+				mLinearLayout.scrollBy(0 , - 30) ;
+				if(mLinearLayout.getScrollY() <= - max)
 					mLinearLayout.setScrollY(0) ;
-				}
-				else {
-					mHandler.postDelayed(this , 500) ;
-				}
+				mHandler.postDelayed(this , 50) ;
 			}
 		}
 	} ;
@@ -54,9 +56,17 @@ public class MainActivity extends Activity implements OnPreDrawListener {
 	 */
 	@ Override
 	public boolean onPreDraw() {
-		max = Math.abs(getWindow().getDecorView().getHeight()
-				- mLinearLayout.getChildAt(0).getHeight()) ;
-		Log.i("tag" , "max" + max) ;
-		return false ;
+		max = Math.abs(getWindow().getDecorView().getHeight() - 50) ;
+		return true ;
+	}
+
+	/**
+	 * 	(non-Javadoc)
+	 * 	@see android.app.Activity#onDestroy()
+	 */
+	@ Override
+	protected void onDestroy() {
+		super.onDestroy() ;
+		mHandler.removeCallbacks(ScrollRunnable) ;
 	}
 }
